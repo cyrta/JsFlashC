@@ -134,7 +134,15 @@
   	display: inline;
   	
   }
-  
+  	ol, ul {	
+		list-style: none;
+	}
+	
+	#log-list .log-event div {
+		border-bottom: 1px solid #F1F1F1;
+		padding: 5px;
+		width: 95%;
+	}
   </style>
 
 </head>
@@ -151,8 +159,13 @@
 			Event Log:
 		</div>
 		<div id="log">
+		   	<ul id="log-list">
+				<!-- <li class="log-event"> <div> log initialized </div> </li> -->
+			</ul>
 		</div>
 	</div>
+	
+	
  
  	<footer>
  		<a href="http://www.metamedia.pl" > © Copyright 2011 Metamedia Technologies </a>
@@ -160,5 +173,98 @@
   </div>
  
   <script src="JsFlashC.js"> </script>
+  
+  <script>
+  
+	
+   /****** 3rd Party ***********/
+  	
+  	// FlashDetect, by Carl Yestrau
+	// http://www.featureblend.com/license.txt
+	var FlashDetect=new function(){var self=this;self.installed=false;self.raw="";self.major=-1;self.minor=-1;self.revision=-1;self.revisionStr="";var activeXDetectRules=[{"name":"ShockwaveFlash.ShockwaveFlash.7","version":function(obj){return getActiveXVersion(obj);}},{"name":"ShockwaveFlash.ShockwaveFlash.6","version":function(obj){var version="6,0,21";try{obj.AllowScriptAccess="always";version=getActiveXVersion(obj);}catch(err){}
+	return version;}},{"name":"ShockwaveFlash.ShockwaveFlash","version":function(obj){return getActiveXVersion(obj);}}];var getActiveXVersion=function(activeXObj){var version=-1;try{version=activeXObj.GetVariable("$version");}catch(err){}
+	return version;};var getActiveXObject=function(name){var obj=-1;try{obj=new ActiveXObject(name);}catch(err){}
+	return obj;};var parseActiveXVersion=function(str){var versionArray=str.split(",");return{"raw":str,"major":parseInt(versionArray[0].split(" ")[1],10),"minor":parseInt(versionArray[1],10),"revision":parseInt(versionArray[2],10),"revisionStr":versionArray[2]};};var parseStandardVersion=function(str){var descParts=str.split(/ +/);var majorMinor=descParts[2].split(/\./);var revisionStr=descParts[3];return{"raw":str,"major":parseInt(majorMinor[0],10),"minor":parseInt(majorMinor[1],10),"revisionStr":revisionStr,"revision":parseRevisionStrToInt(revisionStr)};};var parseRevisionStrToInt=function(str){return parseInt(str.replace(/[a-zA-Z]/g,""),10)||self.revision;};self.majorAtLeast=function(version){return self.major>=version;};self.FlashDetect=function(){if(navigator.plugins&&navigator.plugins.length>0){var type='application/x-shockwave-flash';var mimeTypes=navigator.mimeTypes;if(mimeTypes&&mimeTypes[type]&&mimeTypes[type].enabledPlugin&&mimeTypes[type].enabledPlugin.description){var version=mimeTypes[type].enabledPlugin.description;var versionObj=parseStandardVersion(version);self.raw=versionObj.raw;self.major=versionObj.major;self.minor=versionObj.minor;self.revisionStr=versionObj.revisionStr;self.revision=versionObj.revision;self.installed=true;}}else if(navigator.appVersion.indexOf("Mac")==-1&&window.execScript){var version=-1;for(var i=0;i<activeXDetectRules.length&&version==-1;i++){var obj=getActiveXObject(activeXDetectRules[i].name);if(typeof obj=="object"){self.installed=true;version=activeXDetectRules[i].version(obj);if(version!=-1){var versionObj=parseActiveXVersion(version);self.raw=versionObj.raw;self.major=versionObj.major;self.minor=versionObj.minor;self.revision=versionObj.revision;self.revisionStr=versionObj.revisionStr;}}}}}();};FlashDetect.release="1.0.3";
+
+	
+   /****** DOM manipulation ******/
+	
+	function _id(sID) {
+  		return document.getElementById(sID);
+	}
+	
+	function PushEventLogText(str) {
+		var list = _id("log-list");
+		list.innerHTML += '<li class="log-event"> <div>' + str + '</div></li>';
+	}
+	
+	
+   /****** Testing **********/
+	
+	function checkFlashPlugin() {
+    	var fd = FlashDetect;
+   		var hasFlash = fd.installed;
+    	//var isSupported = (hasFlash && fd.major >= soundManager.flashVersion);
+    	var flashVersion = fd.major+'.'+fd.minor+'.'+fd.revisionStr;
+    	if (hasFlash) {
+    		PushEventLogText("Flash Player version:  " + flashVersion);
+	    	return true;
+    	} else {
+    		PushEventLogText("Flash Player: missing!!!");
+		    return false;
+    	}  	
+	}
+	
+	function createSwfObject() {
+		//PushEventLogText("SWF Object: created.");
+		return false;
+	}
+	
+	function checkFlashToJs() {
+		//PushEventLogText("Flash->JS:  version=0.1 ");
+		return false;
+	}
+	
+	function checkJsToFlash() {
+		//PushEventLogText("JS->Flash:  version=0.1 ");
+		return false;
+	}
+	
+	function checkJsToC() {
+		//PushEventLogText("JS->C:  version=0.1 ");
+		return false;
+	}
+	
+	function checkCToJs() {
+		//PushEventLogText("C->JS:  version=0.1 ");
+		return false;
+	}
+	
+	function checkSound() {
+		//PushEventLogText("Sound check:  ... ");
+		return false;
+	}
+	
+	
+	
+	function startTesting() {
+		PushEventLogText("Log: initialized.");
+		var hasFlash = checkFlashPlugin();
+		if (hasFlash) {
+			createSwfObject();
+			checkFlashToJs();
+			checkJsToFlash();
+			checkJsToC();
+			checkCToJs();
+			checkSound();
+		}
+	}
+	
+	if (document.addEventListener) {
+  		document.addEventListener("DOMContentLoaded", startTesting, false);
+	} else {
+  		window.onload = startTesting;
+	}
+  </script>
 </body>
 </html>	
