@@ -1,0 +1,164 @@
+<!doctype html>
+<!--[if lt IE 7 ]> <html lang="en" class="no-js ie6"> <![endif]-->
+<!--[if IE 7 ]>    <html lang="en" class="no-js ie7"> <![endif]-->
+<!--[if IE 8 ]>    <html lang="en" class="no-js ie8"> <![endif]-->
+<!--[if IE 9 ]>    <html lang="en" class="no-js ie9"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!--> <html lang="en" class="no-js"> <!--<![endif]-->
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+
+	<meta http-equiv="Expires" content="0" />
+	<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
+	<meta http-equiv="Cache-Control" content="post-check=0, pre-check=0" />
+	<meta http-equiv="Pragma" content="no-cache" />
+
+	<title>JsFlashC - interface testing</title>
+	<meta name="description" content="">
+	<meta name="author" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<link rel="shortcut icon" href="/favicon.ico">
+	<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+	
+	<!-- <link rel="stylesheet" href="style.css?v=2"> -->
+	<!-- <link rel="stylesheet" media="handheld" href="css/handheld.css?v=2"> -->
+
+    
+    <!-- <script src="script.js"></script> -->
+    
+
+  <style>
+	body, html {
+
+		
+	    border:none;
+    	overflow:hidden;
+    	position:fixed;
+    	top:0;
+    	bottom:0;
+    	left:0;
+    	right:0;
+    	-webkit-transition:background 1s;
+    	margin:0;
+    	padding:0;
+    	line-height: normal;
+    
+     	font-family: "Helvetica Neue", Helvetica, Verdana, Arial, sans-serif;
+     	font-size: 15px;
+      	text-rendering: optimizeLegibility;
+      	min-width: 800px;
+      	overflow: hidden;
+        -webkit-font-smoothing: antialiased;
+        
+        background-color: #E0E0E0;
+  	}
+
+  	div {
+    	display: block;
+  	}
+	
+	#container {
+		width: 100%;
+		height: 100%;
+		
+		margin: 0 auto;
+		padding: 0;
+		width: 980px;
+	}
+	
+	header {
+		position: relative;	
+		top: 5px; 
+		height: 5%;
+		overflow: hidden;
+	}
+	
+	#main {
+    	position: relative;
+    	
+   		height: 90%;
+   		width: 100%;
+    	margin: 20px auto 20px 0; /*bottom*/
+    	padding: 0;
+
+
+	  	/*border: 1px solid #ababab; border-left: 0; border-right: 0;*/
+    	background: transparent;
+    	border: 1 solid transparent;
+
+    	-webkit-border-radius: 3px;
+    	-moz-border-radius: 3px;
+   		border-radius: 3px;
+    	-webkit-box-shadow: 0 1px 0 rgba(0, 0, 0, .05), inset 0 1px 0 rgba(255, 255, 255, .75);
+    	-moz-box-shadow: 0 1px 0 rgba(0, 0, 0, .05), inset 0 1px 0 rgba(255, 255, 255, .75);
+    	box-shadow: 0 1px 0 rgba(0, 0, 0, .05), inset 0 1px 0 rgba(255, 255, 255, .75);
+	}
+	
+	.grayskin #main{
+	    background: none repeat scroll 0 0 white;
+
+    	-moz-box-shadow: 0 0 6px #999;
+    	-webkit-box-shadow: 0 0 6px #999;
+	}
+	
+	#main-header {
+		padding: 10px;
+		 text-shadow: 0 1px 0 #DDD;
+		 border-bottom: 1px solid #CACACA; border-left: 0; border-right: 0;
+	}
+	
+	#log {
+		position: absolute;
+		top: 50px; bottom: 0px; left: 0; right: 0;
+	}
+	
+	footer {
+   		position: relative;
+   		bottom: 10px; 
+   		margin: 0 auto;
+   		width: 980px;
+    	color: #999;	
+    	font-size: 9px;
+    	font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+    	overflow: hidden;
+  }
+  
+  footer a, a:hover, a:active {
+  	text-decoration: none;
+  	color: #999;
+  }
+  h1 {
+  	display: inline;
+  	
+  }
+  
+  </style>
+
+</head>
+
+<body class="grayskin">
+  <div id="container">
+ 	<header>
+ 	   	<h1> JsFlashC </h1>
+ 		<span> Javascript <-> Flash (ActionScript) <-> Alchemy (C/C++) communication </span>
+ 	</header>
+ 
+ 	<div id="main">
+ 		<div id="main-header">
+			Event Log:
+		</div>
+		<div id="log">
+		</div>
+	</div>
+ 
+ 	<footer>
+ 		<a href="http://www.metamedia.pl" > © Copyright 2011 Metamedia Technologies </a>
+ 	</footer>
+  </div>
+ 
+  <script src="JsFlashC.js"> </script>
+</body>
+</html>	
