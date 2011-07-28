@@ -1,3 +1,15 @@
+/** @license
+ *
+ *  JsFlashC Simple test/example for web cross-platform communication
+ *  -----------------------------------------------------------------
+ *
+ * Copyright (c) 2011, Pawel Cyrta - Metamedia Technologies. All rights reserved.
+ * Code provided under the BSD License.
+ *
+ * @author Pawel Cyrta - pawel.cyrta@metamedia.pl
+ *
+ */
+
 
 /*
  echo(str)  	- return what was given
@@ -35,25 +47,30 @@ static AS3_Val echo(void* self, AS3_Val args)
 }
 
 
-static AS3_Val inc(void* self, AS3_Val args)
+static AS3_Val incValue(void* self, AS3_Val args)
 {
+	return AS3_Int(0);
 }
 
-static AS3_Val memset(void* self, AS3_Val args)
+static AS3_Val memorySet(void* self, AS3_Val args)
 {
+	return AS3_Int(0);
 }
 
-static AS3_Val malloc(void* self, AS3_Val args)
+static AS3_Val memAlloc(void* self, AS3_Val args)
 {
+	return AS3_Int(0);
 }
 
-static AS3_Val free(void* self, AS3_Val args)
+static AS3_Val memFree(void* self, AS3_Val args)
 {
+	return AS3_Int(0);
 }
 
 
 static AS3_Val callJsCallback(void* self, AS3_Val args)
 {
+	return AS3_Int(0);
 }
 
 //entry point for code

@@ -10,8 +10,8 @@ Usage
 =====
  To compile:
 
-  1. alc-on; gcc -O3 -Wall -c JsFlashC.c -swc JsFlashC.swc; alc-off
+  1. alc-on; gcc -O3 -Wall -c JsFlashC.c -swc JsFlashC.swc; alc-off;
 
-  2. 
+  2. mxmlc -library-path+=./JsFlashC.swc --target-player=10.2.0 JsFlashC.as 
 
   3. Open index.html in browser

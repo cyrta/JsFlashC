@@ -1,19 +1,32 @@
-
+/** @license
+ *
+ *  JsFlashC Simple test/example for web cross-platform communication
+ *  -----------------------------------------------------------------
+ *
+ * Copyright (c) 2011, Pawel Cyrta - Metamedia Technologies. All rights reserved.
+ * Code provided under the BSD License.
+ *
+ * @author Pawel Cyrta - pawel.cyrta@metamedia.pl
+ *
+ */
 
 
 package
 {
 	import flash.display.Sprite;
 	import flash.external.ExternalInterface; // woo
-  	
-    import cmodule.jsFlashC.CLibInit;
+	import flash.utils.ByteArray;
+	
+	import flash.system.System;
+	
+    import cmodule.JsFlashC.CLibInit;
   	
   	
   	
     public class JsFlashC extends Sprite 
     {
     
-        public var version:String = "V0.1.0";
+    	public var version:String = "V0.1.0";
     	public var version_as:String = "(AS3/Flash 10)";
 
     /*
@@ -32,18 +45,25 @@ package
     	public var baseJSController:String = "jsFlashC";
     	public var baseJSObject:String = baseJSController + ".sounds";
     
-        public var debugEnabled: Boolean = true; // Flash debug output enabled by default, disabled by JS call
+			public var didSandboxMessage: Boolean = false;
+      public var debugEnabled: Boolean = true; // Flash debug output enabled by default, disabled by JS call
     	public var flashDebugEnabled: Boolean = false; // Flash internal debug output (write to visible SWF in browser)
-        public var caughtFatal: Boolean = false;
+      public var caughtFatal: Boolean = false;
     
     	public var messages:Array = [];
-        public var textField: TextField = null;
-	    public var textStyle: TextFormat = new TextFormat();
+     //   public var textField: TextField = null;
+	   // public var textStyle: TextFormat = new TextFormat();
     
-        public function JsFlashC()
-		{
+    	/** For Sharing */
+    	public const Memory: ByteArray = new ByteArray();
+    	
+			/** connector to alchemy C code/methods */
+			private var _lib:Object = null;
+			
+      public function JsFlashC()
+			{
 	    	var loader:CLibInit = new CLibInit;
-	    	var lib:Object = loader.init();
+	    	_lib = loader.init();
 	    	
 	    	 if (ExternalInterface.available) {
         		flashDebug('ExternalInterface available');
@@ -58,7 +78,7 @@ package
         		flashDebug('Fatal: ExternalInterface (Flash &lt;-&gt; JS) not available');
      		 };
      		 
-     		 // call after delay, to be safe (ensure callbacks are registered by the time JS is called below)
+     	/*	 // call after delay, to be safe (ensure callbacks are registered by the time JS is called below)
       		var timer: Timer = new Timer(20, 0);
      		 timer.addEventListener(TimerEvent.TIMER, function() : void {
        			 timer.reset();
@@ -69,6 +89,7 @@ package
       		timer.start();
       		// delayed, see above
       		// _externalInterfaceTest(true);
+					*/
 		}
 		
 		
@@ -76,13 +97,16 @@ package
     // interface (for JS)
     // -----------------------------------
     
-		private function _echo() {
-			trace(lib.echo("World!"));
+		private function _echo(str:String) :String {
+			var s:String = _lib.echo(str);
+			trace(s);
+			return s;
 		}
 		
-		private function _inc() {
-			var counter = 0;
-			trace(lib.inc(counter));
+		private function _inc(value:int)	:int {
+			_lib.inc(value);
+			trace(value);
+			return value;
 		}
 		
 		//public function memset
@@ -100,7 +124,7 @@ package
 	public function flashDebug (txt:String) : void {
       // <d>
       messages.push(txt);
-      if (this.flashDebugEnabled) {
+    /*  if (this.flashDebugEnabled) {
         var didCreate: Boolean = false;
         textStyle.font = 'Arial';
         textStyle.size = 12;
@@ -125,7 +149,8 @@ package
           this.addChild(textField);
         }
       }
-      // </d>
+      */
+			// </d>
     } //end of flashDebug
     
     

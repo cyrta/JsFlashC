@@ -4,8 +4,10 @@
  *  -----------------------------------------------------------------
  *
  * Copyright (c) 2011, Pawel Cyrta - Metamedia Technologies. All rights reserved.
- * Code provided under the BSD License:
- * 
+ * Code provided under the BSD License.
+ *
+ * @author Pawel Cyrta - pawel.cyrta@metamedia.pl
+ *
  */
 
 
@@ -19,27 +21,35 @@ var jsFlashC = null;
 function JsFlashC(urlSWF, id) {
 
   this.version = null;
-  this.versionNumber = 'V0.1.0';
+	this.versionNumber = 'V0.1.0';
   
-   this.url = (urlSWF || null);
-   this.swfLoaded = false;
-  this.enabled = false;
+  this.url = (urlSWF || null);
+	this.swfLoaded = false;
+	this.enabled = false;
   
-    this.id = (id || 'jsFlashC-movie');
+  this.id = (id || 'jsFlashC-movie');
     
-      this.didFlashBlock = false;
+  this.didFlashBlock = false;
       
-     var  _js = this, _hasConsole = (typeof console !== 'undefined' && typeof console.log !== 'undefined'), _isFocused = (typeof _doc.hasFocus !== 'undefined'?_doc.hasFocus():null), _tryInitOnFocus = (typeof _doc.hasFocus === 'undefined' && _isSafari), _okToDisable = !_tryInitOnFocus, _flashMIME = /(mp3|mp4|mpa)/i;
-_fV = this.flashVersion, _doc = document,
-_getDocument, _id
+  var _js = this, 
+			_hasConsole = (typeof console !== 'undefined' && typeof console.log !== 'undefined'), 
+			_isFocused = (typeof _doc.hasFocus !== 'undefined'?_doc.hasFocus():null),
+			_tryInitOnFocus = (typeof _doc.hasFocus === 'undefined' && _isSafari), 
+			_okToDisable = !_tryInitOnFocus,
+			_doc = document,
+			_win = window,
+			_debugLevels = ['log', 'info', 'warn', 'error']
+			;
 
-_debugLevels = ['log', 'info', 'warn', 'error']
+
+
 
 // --- public API methods ---
 
   this.ok = function() {
-    return (_needsFlash?(_didInit && !_disabled):(_s.useHTML5Audio && _s.hasHTML5));
+    
   };
+
   
   //flash
   //echo
@@ -77,7 +87,8 @@ _debugLevels = ['log', 'info', 'warn', 'error']
 
  _detectFlash = function() {
 
-    // hat tip: Flash Detect library (BSD, (C) 2007) by Carl "DocYes" S. Yestrau - http://featureblend.com/javascript-flash-detection-library.html / http://featureblend.com/license.txt
+    // hat tip: Flash Detect library (BSD, (C) 2007) by Carl "DocYes" S. Yestrau 
+	// - http://featureblend.com/javascript-flash-detection-library.html / http://featureblend.com/license.txt
 
     if (_hasFlash !== undefined) {
       // this work has already been done.
