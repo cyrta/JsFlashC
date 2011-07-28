@@ -191,89 +191,18 @@
 	
    /****** DOM manipulation ******/
 	
-	function _id(sID) {
-  		return document.getElementById(sID);
-	}
-	
-	function PushEventLogText(str) {
-		var list = _id("log-list");
-		list.innerHTML += '<li class="log-event"> <div>' + str + '</div></li>';
-	}
+
 	
 	
-   /****** Testing **********/
-	
-	function checkFlashPlugin() {
-    	var fd = FlashDetect;
-   		var hasFlash = fd.installed;
-    	//var isSupported = (hasFlash && fd.major >= soundManager.flashVersion);
-    	var flashVersion = fd.major+'.'+fd.minor+'.'+fd.revisionStr;
-    	if (hasFlash) {
-    		PushEventLogText("Flash Player version:  " + flashVersion);
-	    	return true;
-    	} else {
-    		PushEventLogText("Flash Player: missing!!!");
-		    return false;
-    	}  	
-	}
-	
-	function createSwfObject() {
-		
-		if (swfobject.hasFlashPlayerVersion("10.2")) {
-			var att = { data:"JsFlashC.swf", width:"1", height:"1" };
-		  var par = { menu:"false" };
-		  var id = "flashObjectContainer";
-		  var myFlashContent = swfobject.createSWF(att, par, id);
-			if (typeof myFlashContent === "undefined") {
-				PushEventLogText("[ERROR] SWF Object: not created.");
-			} else {
-				PushEventLogText("SWF Object: created.");
-			}
-		} else {
-			PushEventLogText("SWF Object: need Flash Player version  10.0 or greater.");
-		}
-		//		
-		return false;
-	}
-	
-	function checkFlashToJs() {
-		//PushEventLogText("Flash->JS:  version=0.1 ");
-		return false;
-	}
-	
-	function checkJsToFlash() {
-		//PushEventLogText("JS->Flash:  version=0.1 ");
-		return false;
-	}
-	
-	function checkJsToC() {
-		//PushEventLogText("JS->C:  version=0.1 ");
-		return false;
-	}
-	
-	function checkCToJs() {
-		//PushEventLogText("C->JS:  version=0.1 ");
-		return false;
-	}
-	
-	function checkSound() {
-		//PushEventLogText("Sound check:  ... ");
-		return false;
-	}
+  
 	
 	
 	
 	function startTesting() {
-		PushEventLogText("Log: initialized.");
-		var hasFlash = checkFlashPlugin();
-		if (hasFlash) {
-			createSwfObject();
-			checkFlashToJs();
-			checkJsToFlash();
-			checkJsToC();
-			checkCToJs();
-			checkSound();
-		}
+		
+		jsFlashC = new JsFlashC("flashObjectContainer");
+		jsFlashC.test();
+
 	}
 	
 	if (document.addEventListener) {
