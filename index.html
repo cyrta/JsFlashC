@@ -163,6 +163,7 @@
 				<!-- <li class="log-event"> <div> log initialized </div> </li> -->
 			</ul>
 		</div>
+		<div id="flashObjectContainer"></div>
 	</div>
 	
 	
@@ -172,7 +173,7 @@
  	</footer>
   </div>
  
-  <script src="http://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"> </script>
+  <script src="http://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject_src.js"> </script>
   <script src="JsFlashC.js"> </script>
   
   <script>
@@ -218,15 +219,15 @@
 	
 	function createSwfObject() {
 		
-		if (swfobject.hasFlashPlayerVersion("10")) {
+		if (swfobject.hasFlashPlayerVersion("10.2")) {
 			var att = { data:"JsFlashC.swf", width:"1", height:"1" };
 		  var par = { menu:"false" };
-		  var id = "flashObject";
+		  var id = "flashObjectContainer";
 		  var myFlashContent = swfobject.createSWF(att, par, id);
-			if (myFlashContent === 'undefined') {
-				PushEventLogText("SWF Object: created.");
-			} else {
+			if (typeof myFlashContent === "undefined") {
 				PushEventLogText("[ERROR] SWF Object: not created.");
+			} else {
+				PushEventLogText("SWF Object: created.");
 			}
 		} else {
 			PushEventLogText("SWF Object: need Flash Player version  10.0 or greater.");
