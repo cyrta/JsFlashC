@@ -19,7 +19,7 @@ var jsFlashC = null;
 function JsFlashC(urlSWF, id) {
 
   this.version = null;
-  this.versionNumber = 'V2.97a.20110706';
+  this.versionNumber = 'V0.1.0';
   
    this.url = (urlSWF || null);
    this.swfLoaded = false;
@@ -40,6 +40,14 @@ _debugLevels = ['log', 'info', 'warn', 'error']
   this.ok = function() {
     return (_needsFlash?(_didInit && !_disabled):(_s.useHTML5Audio && _s.hasHTML5));
   };
+  
+  //flash
+  //echo
+  //inc
+  //memset
+  //alloc
+  //free
+  //callJsCallback
   
 // ---- other helpers -----
 
