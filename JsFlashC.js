@@ -29,6 +29,7 @@ function JsFlashC(id) {
   this.version = null;
   this.versionNumber = 'V0.1.0';
   this.swfLoaded = false;
+  this.swfReady = false;
   this.enabled = false;
 
   this.id = (id || 'flash-container');
@@ -112,12 +113,30 @@ function JsFlashC(id) {
  //synchronization to overcame race condition when loading dynamically object
  // and calling flash function 
  _checkIfSwfLoaded = function(cbFunc) {
+   var result = false;
    if (_js.swfLoaded) {
-     return true;
+     result = true;
    } else {
     _event.add(_win, 'load', function() { cbFunc();} );
     return false;
    }
+   
+   if (result && _js.swfReady) {
+     result = true;
+   } else {
+     //busy waiting ...
+     var busyWait  = function() { 
+      if (_js.swfReady) {
+        return;
+      } else {
+        setTimeout(busyWait, 100);
+        return;
+      }
+     }
+     setTimeout( busyWait, 100)
+     return false;
+   }
+   return result;
  }
 
  _checkFlashPlugin = function() {
@@ -242,6 +261,12 @@ function JsFlashC(id) {
   _doNothing = function() {
     return false;
   };
+
+// ----- ExternalInteraface for Flash  ------ 
+
+ _onFlashReady = function() {
+   _js.swfReady;
+ };
 
 // ----- Event Handling  ------ 
  //with a little help from SoundManager2
