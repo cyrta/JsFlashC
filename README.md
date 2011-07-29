@@ -22,3 +22,11 @@ Dev
 
  While developing use JsLint to find javascript errorse.g.:
      gjslint  JsFlashC.js
+
+
+
+References
+==========
+
+ 1. Adobe ActionScript ExternalInterface API documentation
+ http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/external/ExternalInterface.html

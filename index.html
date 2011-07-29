@@ -173,43 +173,64 @@
  	</footer>
   </div>
  
-  <script src="http://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject_src.js"> </script>
-  <script src="JsFlashC.js"> </script>
-  
-  <script>
-  
-	
-   /****** 3rd Party ***********/
-  	
-  	// FlashDetect, by Carl Yestrau
-	// http://www.featureblend.com/license.txt
-	var FlashDetect=new function(){var self=this;self.installed=false;self.raw="";self.major=-1;self.minor=-1;self.revision=-1;self.revisionStr="";var activeXDetectRules=[{"name":"ShockwaveFlash.ShockwaveFlash.7","version":function(obj){return getActiveXVersion(obj);}},{"name":"ShockwaveFlash.ShockwaveFlash.6","version":function(obj){var version="6,0,21";try{obj.AllowScriptAccess="always";version=getActiveXVersion(obj);}catch(err){}
-	return version;}},{"name":"ShockwaveFlash.ShockwaveFlash","version":function(obj){return getActiveXVersion(obj);}}];var getActiveXVersion=function(activeXObj){var version=-1;try{version=activeXObj.GetVariable("$version");}catch(err){}
-	return version;};var getActiveXObject=function(name){var obj=-1;try{obj=new ActiveXObject(name);}catch(err){}
-	return obj;};var parseActiveXVersion=function(str){var versionArray=str.split(",");return{"raw":str,"major":parseInt(versionArray[0].split(" ")[1],10),"minor":parseInt(versionArray[1],10),"revision":parseInt(versionArray[2],10),"revisionStr":versionArray[2]};};var parseStandardVersion=function(str){var descParts=str.split(/ +/);var majorMinor=descParts[2].split(/\./);var revisionStr=descParts[3];return{"raw":str,"major":parseInt(majorMinor[0],10),"minor":parseInt(majorMinor[1],10),"revisionStr":revisionStr,"revision":parseRevisionStrToInt(revisionStr)};};var parseRevisionStrToInt=function(str){return parseInt(str.replace(/[a-zA-Z]/g,""),10)||self.revision;};self.majorAtLeast=function(version){return self.major>=version;};self.FlashDetect=function(){if(navigator.plugins&&navigator.plugins.length>0){var type='application/x-shockwave-flash';var mimeTypes=navigator.mimeTypes;if(mimeTypes&&mimeTypes[type]&&mimeTypes[type].enabledPlugin&&mimeTypes[type].enabledPlugin.description){var version=mimeTypes[type].enabledPlugin.description;var versionObj=parseStandardVersion(version);self.raw=versionObj.raw;self.major=versionObj.major;self.minor=versionObj.minor;self.revisionStr=versionObj.revisionStr;self.revision=versionObj.revision;self.installed=true;}}else if(navigator.appVersion.indexOf("Mac")==-1&&window.execScript){var version=-1;for(var i=0;i<activeXDetectRules.length&&version==-1;i++){var obj=getActiveXObject(activeXDetectRules[i].name);if(typeof obj=="object"){self.installed=true;version=activeXDetectRules[i].version(obj);if(version!=-1){var versionObj=parseActiveXVersion(version);self.raw=versionObj.raw;self.major=versionObj.major;self.minor=versionObj.minor;self.revision=versionObj.revision;self.revisionStr=versionObj.revisionStr;}}}}}();};FlashDetect.release="1.0.3";
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.js"></script>
 
-	
-   /****** DOM manipulation ******/
-	
 
-	
-	
-  
-	
-	
-	
-	function startTesting() {
-		
-		jsFlashC = new JsFlashC("flashObjectContainer");
-		jsFlashC.test();
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js">
+</script>
 
+<script type="text/javascript" src="http://www.featureblend.com/flash_detect_1-0-4/flash_detect_min.js">
+</script>
+
+
+<script type="text/javascript" src="JsFlashC.js"></script>
+<!--
+<script type="text/javascript">
+	//dynamically loading LabJs
+	// compressed more suitable for inlining
+	// ~640b before gzip
+	// from https://gist.github.com/603980
+	(function(g,b,d){var 	c=b.head||b.getElementsByTagName("head"),D="readyState",E="onreadystatechange",F="DOMContentLoaded",G="addEventListener",H=setTimeout;
+
+	function f(){
+   	// $LAB stuff here
+ 		//http://labjs.com/documentation.php
+		$LAB
+			 .setOptions({AlwaysPreserveOrder:true})
+			 .script(
+				"http://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js")
+			 .script(
+				 "http://www.featureblend.com/flash_detect_1-0-4/flash_detect_min.js")
+			 
+		   .script('JsFlashC.js')
+			 .wait( function() {
+				})
 	}
+H(function(){if("item"in c){if(!c[0]){H(arguments.callee,25);return}c=c[0]}var a=b.createElement("script"),e=false;a.onload=a[E]=function(){if((a[D]&&a[D]!=="complete"&&a[D]!=="loaded")||e){return false}a.onload=a[E]=null;e=true;f()};
+
+	a.src="http://labjs.com/js/LAB.js";
+
+c.insertBefore(a,c.firstChild)},0);if(b[D]==null&&b[G]){b[D]="loading";b[G](F,d=function(){b.removeEventListener(F,d,false);b[D]="complete"},false)}})(this,document);
+
+-->
+<script type="text/javascript">
+
+ //http://javascript.info/tutorial/onload-ondomcontentloaded
+
+ $(document).ready( function() { 
+	 console.log("jQuery.onready: begin");
 	
-	if (document.addEventListener) {
-  		document.addEventListener("DOMContentLoaded", startTesting, false);
-	} else {
-  		window.onload = startTesting;
-	}
-  </script>
+	 window.jsFlashC = new JsFlashC("Obj1");
+	 window.jsFlashC.test();
+
+
+	  //function _handle() { console.log("HURRA!"); };
+	  //_event.add(_win, 'load', _handle);
+	console.log("jQuery.onready: end");
+	});
+	
+</script>
+
+	
 </body>
 </html>	

@@ -17,6 +17,9 @@ plusplus: false, bitwise: true, regexp: false, newcap: true, immed: true */
 /*global window, console, document, navigator, setTimeout, setInterval,
 clearInterval, Audio */
 
+
+
+
 (function(window) {
 
 var jsFlashC = null;
@@ -29,7 +32,7 @@ function JsFlashC(id) {
   this.enabled = false;
 
   this.id = (id || 'flash-container');
-  this.eventlogId = "log-list";
+  this.eventlogId = 'log-list';
 
   this.didFlashBlock = false;
 
@@ -43,23 +46,43 @@ function JsFlashC(id) {
                      typeof console.log !== 'undefined'),
       _doc = window.document,
       _win = window,
+      _ua = navigator.userAgent,
+        _is_pre = _ua.match(/pre\//i)
+        _is_iDevice = _ua.match(/(ipad|iphone|ipod)/i),
+        _isMobile = (_ua.match(/mobile/i) || _is_pre || _is_iDevice),
+        _isIE = _ua.match(/msie/i), _isWebkit = _ua.match(/webkit/i),
+        _isSafari = (_ua.match(/safari/i) && !_ua.match(/chrome/i)),
+        _isOpera = (_ua.match(/opera/i)),
       _slice = Array.prototype.slice,
-      _debugLevels = ['log', 'info', 'warn', 'error'];
+      _event = null,
+      _swf = 'JsFlashC.swf',
+      _flashWrapper = null,
+      _flashElement = null,
+      _flashVersion = '',
+      _debugLevels = ['log', 'info', 'warn', 'error'],
+      _id = null,
+      _getDocument = null,
+      _doNothing = null ;
 
 
 
 
 // --- public API methods ---
 
-  this.ok = function() {
-
+  this.getMovie = function(objID) {
+    return _isIE?_win[objID]:(_isSafari?_id(objID)||_doc[objID]:_id(objID));
   };
 
   this.test = function() {
+    if (_checkIfSwfLoaded(_js.test) === false ) {
+     return false;
+   
+   }
+     
     _js._wD('Log: initialized.');
     var hasFlash = _checkFlashPlugin();
     if (hasFlash) {
-      _createSwfObject();
+      //_createSwfObject();
       _checkFlashToJs();
       _checkJsToFlash();
       _checkJsToC();
@@ -68,6 +91,9 @@ function JsFlashC(id) {
     }
   }
 
+  this.testqueue = function() {
+    _event.add(_win, 'load', function() { console.log("testqueu");} );
+  }
   //flash
   //echo
   //inc
@@ -80,15 +106,27 @@ function JsFlashC(id) {
 ///
 
 
+
  /****** Testing **********/
+
+ //synchronization to overcame race condition when loading dynamically object
+ // and calling flash function 
+ _checkIfSwfLoaded = function(cbFunc) {
+   if (_js.swfLoaded) {
+     return true;
+   } else {
+    _event.add(_win, 'load', function() { cbFunc();} );
+    return false;
+   }
+ }
 
  _checkFlashPlugin = function() {
    var fd = FlashDetect;
    var hasFlash = fd.installed;
    //var isSupported = (hasFlash && fd.major >= soundManager.flashVersion);
-   var flashVersion = fd.major + '.' + fd.minor + '.' + fd.revisionStr;
+   _js._flashVersion = fd.major + '.' + fd.minor + '.' + fd.revisionStr;
    if (hasFlash) {
-     _js._wD('Flash Player version:  ' + flashVersion);
+     _js._wD('Flash Player version:  ' + _js._flashVersion);
      return true;
    } else {
      _js._wD('Flash Player: missing!!!', 3);
@@ -97,32 +135,82 @@ function JsFlashC(id) {
  };
 
  _createSwfObject = function() {
+   var result = null;
    if (swfobject.hasFlashPlayerVersion('10.2')) {
-     var att = { data: 'JsFlashC.swf', width: '1', height: '1' };
-     var par = { menu: 'false' };
-     var id = 'flashObjectContainer';
-     var myFlashContent = swfobject.createSWF(att, par, id);
-     if (typeof myFlashContent === 'undefined') {
-       _js._wD('[ERROR] SWF Object: not created.');
-     } else {
-       _js._wD('SWF Object: created.');
-     }
+     _flashWrapper = _doc.createElement('div');
+     _flashWrapper.id = 'JsFlashC-wrapper' + _js.id;
+    // Credit to SoundManager2 for this:
+    var s = _flashWrapper.style;
+    s['position'] = 'fixed';
+    s['width'] = s['height'] = '8px'; // must be at least 6px for flash to run fast
+    s['bottom'] = s['left'] = '0px';
+    s['overflow'] = 'hidden';
+    _flashElement = _doc.createElement('div');
+    _flashElement.id = 'JsFlashC-object-' + _js.id;
+    _flashWrapper.appendChild(_flashElement);
+    _doc.body.appendChild(_flashWrapper);
+
+    //http://www.bobbyvandersluis.com/swfobject/generator/index.html
+    swfobject.embedSWF(
+      _swf,
+      _flashElement.id,
+      '8',
+      '8',
+      '10.0.0',
+      "expressInstall.swf",
+      { 'debugMode': _js.debugMode }, //flashvars
+      {'allowScriptAccess': 'always', 'menu': 'false', 'quality': 'high', 
+      'wmode' : 'transparent',
+      'hasPriority': 'true' }, // http://help.adobe.com/en_US/as3/mobile/WS4bebcd66a74275c36cfb8137124318eebc6-7ffd.html
+      null,
+      function(e) {
+        //_js._flashElement = e.ref;
+        if(e.success)
+          console.log("swf loaded: success");
+        else {
+          //console.error("swf loaded: error " + e );
+          _js._wD('[ERROR] SWF Object: not created.');
+        }
+        if (_isWebkit) {
+          _flashElement.style.zIndex = 10000; // soundcloud-reported render/crash fix, safari 5
+        }
+      }
+    );
+    //callback is not relaible to count on it while using flag semaphore
+    // bind an event on window object when all thing ended loading
+    _event.add(_win, 'load', function() { 
+        _js._flashElement = swfobject.getObjectById('JsFlashC-object-' + _js.id);
+        _js.swfLoaded = true;
+        _js._wD('SWF Object: created.');
+    } );
+
+
     } else {
       _js._wD('SWF Object: need Flash Player' +
                         'version 10.0 or greater.', 3);
     }
     //
-    return false;
+    return _flashElement;
   };
 
   _checkFlashToJs = function() {
     //PushEventLogText("Flash->JS:  version=0.1 ");
-    return false;
   };
 
   _checkJsToFlash = function() {
     //PushEventLogText("JS->Flash:  version=0.1 ");
-    return false;
+    var str = '';
+    if (!_flashElement) {
+      _js._wD('JS->Flash: swf object reference is null', 3);
+    }
+    str = _flashElement["version"]();
+    if (str === '') {
+      _js._wD('JS->Flash: not connected', 3);
+      return false;
+    } else {
+      _js._wD('JS->Flash: version=' + str);
+      return true;
+    }
   };
 
   _checkJsToC = function() {
@@ -139,7 +227,7 @@ function JsFlashC(id) {
     //PushEventLogText("Sound check:  ... ");
     return false;
   };
-  
+
 // ---- other helpers -----
 
   _getDocument = function() {
@@ -155,7 +243,54 @@ function JsFlashC(id) {
     return false;
   };
 
- 
+// ----- Event Handling  ------ 
+ //with a little help from SoundManager2
+_event = (function() {
+
+    var old = (_win.attachEvent),
+    evt = {
+      add: (old?'attachEvent':'addEventListener'),
+      remove: (old?'detachEvent':'removeEventListener')
+    };
+
+    function getArgs(oArgs) {
+      var args = _slice.call(oArgs), len = args.length;
+      if (old) {
+        args[1] = 'on' + args[1]; // prefix
+        if (len > 3) {
+          args.pop(); // no capture
+        }
+      } else if (len === 3) {
+        args.push(false);
+      }
+      return args;
+    }
+
+    function apply(args, sType) {
+      var element = args.shift(),
+          method = [evt[sType]];
+      if (old) {
+        element[method](args[0], args[1]);
+      } else {
+        element[method].apply(element, args);
+      }
+    }
+
+    function add() {
+      apply(getArgs(arguments), 'add');
+    }
+
+    function remove() {
+      apply(getArgs(arguments), 'remove');
+    }
+
+    return {
+      'add': add,
+      'remove': remove
+    };
+
+  }());
+// ------ Debuging ------
 
   _pushEventLogText = function(str) {
     var list = _id(_js.eventlogId);
@@ -169,11 +304,11 @@ function JsFlashC(id) {
     if (!_js.debugMode) {
         return false;
     }
-    if (this.showTimestampOnLog || 
+    if (this.showTimestampOnLog ||
           (typeof bTimestamp !== 'undefined' && bTimestamp)) {
       var d = new Date();
-      sText = '[' + d.toLocaleTimeString() + '.' + d.getMilliseconds()+
-              '] ' + sText ;
+      sText = '[' + d.toLocaleTimeString() + '.' + d.getMilliseconds() +
+              '] ' + sText;
     }
     if (_hasConsole && _js.useConsole) {
       sMethod = _debugLevels[sType];
@@ -199,6 +334,14 @@ function JsFlashC(id) {
     }
   };
 
+
+  _init = function() {
+    var hasFlash = _checkFlashPlugin();
+     if (hasFlash) {
+       _createSwfObject();
+     }
+  };
+  _init();
 };
 
 

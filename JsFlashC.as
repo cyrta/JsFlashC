@@ -43,7 +43,7 @@ package
 
     	// externalInterface references (for Javascript callbacks)
     	public var baseJSController:String = "jsFlashC";
-    	public var baseJSObject:String = baseJSController + ".sounds";
+    	//public var baseJSObject:String = baseJSController + ".sounds";
     
 			public var didSandboxMessage: Boolean = false;
       public var debugEnabled: Boolean = true; // Flash debug output enabled by default, disabled by JS call
@@ -71,6 +71,7 @@ package
         	  		flashDebug('Adding ExternalInterface callbacks...');
         			ExternalInterface.addCallback('echo', _echo);
          			ExternalInterface.addCallback('inc', _inc);
+         			ExternalInterface.addCallback('version', _version);
        			 } catch(e: Error) {
           			flashDebug('Fatal: ExternalInterface error: ' + e.toString());
        			 }
@@ -96,6 +97,10 @@ package
 		    
     // interface (for JS)
     // -----------------------------------
+    
+    private function _version() :String {
+      return version;
+    }
     
 		private function _echo(str:String) :String {
 			var s:String = _lib.echo(str);
@@ -163,12 +168,12 @@ package
       // </d>
       return true;
     }
-
+/*
     public function onLoadError(oSound:Object) : void {
       // something went wrong. 404, bad format etc.
       ExternalInterface.call(baseJSObject + "['" + oSound.sID + "']._onload", 0);
     }
-    
+  */  
     public function _externalInterfaceTest(isFirstCall: Boolean) : Boolean {
       var sandboxType:String = flash.system.Security['sandboxType'];
       if (!didSandboxMessage && sandboxType != 'localTrusted' && sandboxType != 'remote') {
