@@ -56,6 +56,7 @@ function JsFlashC(id) {
         _isOpera = (_ua.match(/opera/i)),
       _slice = Array.prototype.slice,
       _event = null,
+      _funcQueue = [],
       _swf = 'JsFlashC.swf',
       _flashWrapper = null,
       _flashElement = null,
@@ -76,21 +77,23 @@ function JsFlashC(id) {
   };
 
   this.test = function() {
-    if (_checkIfSwfLoaded(_js.test) === false) {
-     return false;
-
-   }
-
-    _js._wD('Log: initialized.');
-    var hasFlash = _checkFlashPlugin();
-    if (hasFlash) {
+    if ( _js.swfLoaded && _js.swfReady) {
+      _js._wD("Test: done.");
+    } else {
+      _addToFuncQueue(this.test, this, arguments);
+      _js._wD("Test: function called to early." +
+              " It was queue for later execution.");
+    }
+    //_js._wD('Log: initialized.');
+    //var hasFlash = _checkFlashPlugin();
+    //if (hasFlash) {
       //_createSwfObject();
       //_checkFlashToJs();
       //_checkJsToFlash();
       //_checkJsToC();
      // _checkCToJs();
      // _checkSound();
-    }
+    //}
   }
 
   this.testqueue = function() {
@@ -111,31 +114,31 @@ function JsFlashC(id) {
 
  /****** Testing **********/
 
- //synchronization to overcame race condition when loading dynamically object
+ 
+ // synchronization to overcame race condition when loading dynamically object
  // and calling flash function
- _checkIfSwfLoaded = function(cbFunc) {
+ _checkIfSwfLoadedAndReady = function() {
    var result = false;
-   if (_js.swfLoaded) {
-     result = true;
-   } else {
-    _event.add(_win, 'load', function() { cbFunc();});
+   if (!_js.swfLoaded) {
+    _event.add(_win, 'load', function() { _checkIfSwfLoadedAndReady(); });
     return false;
    }
 
-   if (result && _js.swfReady) {
+   if (_js.swfLoaded && _js.swfReady) {
      result = true;
+     _onLoadedAndReady();
    } else {
      //busy waiting ...
      var busyWait = function() {
-      if (_js.swfReady) {
-        return;
+      if (_js.swfLoaded && _js.swfReady) {
+        _onLoadedAndReady();   
+        return true;
       } else {
-        setTimeout(busyWait, 100);
-        return;
+        setTimeout(busyWait, 20);
+        return false;
       }
      }
-     setTimeout(busyWait, 100);
-     return false;
+     setTimeout(busyWait, 20);
    }
    return result;
  }
@@ -269,50 +272,52 @@ function JsFlashC(id) {
 
 // ----- ExternalInteraface for Flash  ------
 
+ /** Flash indicating that it succesfully called JS method namely this one
+  */
  this._onFlashReady = function() {
-   _js.swfReady = true;
    if (_js.ping() === "pong") {
     _js._wD("[Javascript] JS->Flash: Init OK. Flash interface ready.");
+    _js.swfReady = true;
    } else {
      _js._wD("[Javascript] JS->Flash: Init FAILED. Flash didn't aswer or" + 
                                                 " done it was incorrent.");
+     _js.swfReady = false;
    }
  };
 
+ /*method for Flash Actioncript loading procedure -checking if javascript 
+  * has loaded swfobject */
  this._isJsReady = function() {
    return _js.swfLoaded ;
  }
  
+ 
+ _onLoadedAndReady = function() {
+   if (!_js.debugMode) {
+     _js.flashElement._disableDebug();
+   }
+   //empty the queue of function that were called before fully loaded
+   var funcObj = null;
+   while (_funcQueue.length> 0) {
+     funcObj = _funcQueue.pop();
+     funcObj.method.apply( funcObj.scope, funcObj.arguments );
+   }
+   
+ }
+ /** need to populate queue of functions,it is called when flash is ready */
+ _addToFuncQueue = function(method, scope, arguments) {
+      _funcQueue.push({
+            'method': method,
+            'scope': (scope || null),
+            'arguments': arguments
+          });
+ }
+ 
+ 
+ /** simple method to test interface*/
  this.ping = function() {
    return _js._flashElement.ping();
  }
-
- this._externalInterfaceOK = function(flashDate) {
-     // flash callback confirming flash loaded, EI working etc.
-     // flashDate = approx. timing/delay info for JS/flash bridge
-     if (_s.swfReady) {
-       return false;
-     }
-     var eiTime = new Date().getTime();
-     _js._wD(_smc + 'externalInterfaceOK()' +
-            (flashDate ? ' (~' + (eiTime - flashDate) + ' ms)' : ''));
-     //_debugTS('swf', true);
-     //_debugTS('flashtojs', true);
-     _js.swfReady = true;
-     /*
-     _tryInitOnFocus = false;
-     if (_isBadSafari) {
-       _badSafariFix();
-     }
-     if (_isIE) {
-       // IE needs a timeout OR delay until window.onload
-       //- may need TODO: investigating
-       setTimeout(_init, 100);
-     } else {
-       _init();
-     }
-     */
-   };
 
 // ----- Event Handling  ------
  //with a little help from SoundManager2
@@ -407,12 +412,24 @@ _event = (function() {
 
 
   _init = function() {
+    
     var hasFlash = _checkFlashPlugin();
+    try {
      if (hasFlash) {
-       _createSwfObject();
+         _createSwfObject();
+       }
+       //check if JS and Flash are ready to continue 
+       // sync by delaying and busy waiting 
+       _checkIfSwfLoadedAndReady();
+     
+     } catch(e) {
+      _js._wD("Fatal: error while initialization (" + e +")", 3);
+      //_cleanup();
      }
   };
   _init();
+  
+  
 };
 
 

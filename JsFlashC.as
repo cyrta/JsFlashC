@@ -161,9 +161,9 @@ package
         
         
         if (_checkJavaScriptReady()) {
+          _writeDebug("Flash->JS: Init OK. JavaScript Interface is ready.");          
           ExternalInterface.call(baseJSController + "['_onFlashReady']");
           flashDebug("JavaScript is ready.\n");
-          _writeDebug("Flash->JS: Init OK. JavaScript Interface is ready.");
         } else {
           flashDebug("JavaScript is not ready, creating timer.\n");
           var readyTimer:Timer = new Timer(20, 0);
@@ -174,9 +174,9 @@ package
                  Timer(event.target).reset();
                 //_externalInterfaceTest(true);
                 // timer.reset();
+                _writeDebug("Init OK");
                 ExternalInterface.call(baseJSController + "['_onFlashReady']");
                 flashDebug('Init OK');
-                _writeDebug("Init OK");
               }
           });
           readyTimer.start();
