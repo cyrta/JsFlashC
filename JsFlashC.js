@@ -269,11 +269,17 @@ function JsFlashC(id) {
 
 // ----- ExternalInteraface for Flash  ------
 
- _onFlashReady = function() {
+ this._onFlashReady = function() {
    _js.swfReady = true;
+   if (_js.ping() === "pong") {
+    _js._wD("[Javascript] JS->Flash: Init OK. Flash interface ready.");
+   } else {
+     _js._wD("[Javascript] JS->Flash: Init FAILED. Flash didn't aswer or" + 
+                                                " done it was incorrent.");
+   }
  };
 
- _isJsReady = function() {
+ this._isJsReady = function() {
    return _js.swfLoaded ;
  }
  

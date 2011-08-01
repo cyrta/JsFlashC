@@ -133,7 +133,8 @@ package
     // -----------------------------------
 
     private function _checkJavaScriptReady() :Boolean{
-      var isReady:Boolean = ExternalInterface.call("_isJsReady");
+      var isReady:Boolean = ExternalInterface.call(baseJSController + "['_isJsReady']");
+      
       return isReady;
     }
     
@@ -158,8 +159,11 @@ package
         ExternalInterface.addCallback('inc', _inc);
         
         
+        
         if (_checkJavaScriptReady()) {
+          ExternalInterface.call(baseJSController + "['_onFlashReady']");
           flashDebug("JavaScript is ready.\n");
+          _writeDebug("Flash->JS: Init OK. JavaScript Interface is ready.");
         } else {
           flashDebug("JavaScript is not ready, creating timer.\n");
           var readyTimer:Timer = new Timer(20, 0);
@@ -170,8 +174,9 @@ package
                  Timer(event.target).reset();
                 //_externalInterfaceTest(true);
                 // timer.reset();
-                ExternalInterface.call('jsFlashC._onFlashReady');
+                ExternalInterface.call(baseJSController + "['_onFlashReady']");
                 flashDebug('Init OK');
+                _writeDebug("Init OK");
               }
           });
           readyTimer.start();
@@ -250,10 +255,13 @@ package
     
 
 
-    public function writeDebug (s:String, bTimestamp: Boolean = false) : Boolean {
-      if (!debugEnabled) return false;
+    private function _writeDebug (s:String, bTimestamp: Boolean = false) : Boolean {
+      if (!debugEnabled) 
+        return false;
       // <d>
-      ExternalInterface.call(baseJSController + "['_writeDebug']", "(Flash): " + s, null, bTimestamp);
+      _checkJavaScriptReady();
+      ExternalInterface.call(baseJSController + "['_writeDebug']", "[Flash]: " + s, 0, bTimestamp);
+      
       // </d>
       return true;
     }
@@ -276,16 +284,16 @@ package
           ExternalInterface.call(baseJSController + "._externalInterfaceOK", d.getTime());
           flashDebug('Flash -&gt; JS OK');
         } else {
-          writeDebug('SM2 SWF ' + version + ' ' + version_as);
+          _writeDebug('SM2 SWF ' + version + ' ' + version_as);
           flashDebug('JS -> Flash OK');
           ExternalInterface.call(baseJSController + "._setSandboxType", sandboxType);
-          writeDebug('JS to/from Flash OK');
+          _writeDebug('JS to/from Flash OK');
         }
       } catch (error:SecurityError) {
             flashDebug("Fatal: a SecurityError occurred: " + error.message + "\n"); 
       } catch(e: Error) {
         flashDebug('Fatal: Flash &lt;-&gt; JS error: ' + e.toString());
-        writeDebug('_externalInterfaceTest: Error: ' + e.toString());
+        _writeDebug('_externalInterfaceTest: Error: ' + e.toString());
         if (!caughtFatal) {
           caughtFatal = true;
         }
@@ -294,13 +302,13 @@ package
       return true; // to verify that a call from JS to here, works. (eg. JS receives "true", thus OK.)
     }
 
-    public function _disableDebug() : void {
+    private function _disableDebug() : void {
       // prevent future debug calls from Flash going to client (maybe improve performance)
-      writeDebug('_disableDebug()');
+      _writeDebug('_disableDebug()');
       debugEnabled = false;
     }
     
-    public function _getMemoryUse() : String {
+    private function _getMemoryUse() : String {
       return System.totalMemory.toString();
     }
 

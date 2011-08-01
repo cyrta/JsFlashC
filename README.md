@@ -30,3 +30,13 @@ References
 
  1. Adobe ActionScript ExternalInterface API documentation
  http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/external/ExternalInterface.html
+
+
+
+
+It is good to use Flex Ajax Bridge - FABridge
+  http://livedocs.adobe.com/flex/3/html/help.html?content=ajaxbridge_2.html
+TODO: need to look into it.
+
+There is also JSObject
+  http://code.google.com/p/jsobject/
