@@ -48,7 +48,7 @@ function JsFlashC(id) {
       _doc = window.document,
       _win = window,
       _ua = navigator.userAgent,
-        _is_pre = _ua.match(/pre\//i)
+        _is_pre = _ua.match(/pre\//i);
         _is_iDevice = _ua.match(/(ipad|iphone|ipod)/i),
         _isMobile = (_ua.match(/mobile/i) || _is_pre || _is_iDevice),
         _isIE = _ua.match(/msie/i), _isWebkit = _ua.match(/webkit/i),
@@ -63,7 +63,7 @@ function JsFlashC(id) {
       _debugLevels = ['log', 'info', 'warn', 'error'],
       _id = null,
       _getDocument = null,
-      _doNothing = null ;
+      _doNothing = null;
 
 
 
@@ -71,29 +71,30 @@ function JsFlashC(id) {
 // --- public API methods ---
 
   this.getMovie = function(objID) {
-    return _isIE?_win[objID]:(_isSafari?_id(objID)||_doc[objID]:_id(objID));
+    return _isIE ? _win[objID] : (_isSafari ? _id(objID) ||
+                                  _doc[objID] : _id(objID));
   };
 
   this.test = function() {
-    if (_checkIfSwfLoaded(_js.test) === false ) {
+    if (_checkIfSwfLoaded(_js.test) === false) {
      return false;
-   
+
    }
-     
+
     _js._wD('Log: initialized.');
     var hasFlash = _checkFlashPlugin();
     if (hasFlash) {
       //_createSwfObject();
-      _checkFlashToJs();
-      _checkJsToFlash();
-      _checkJsToC();
-      _checkCToJs();
-      _checkSound();
+      //_checkFlashToJs();
+      //_checkJsToFlash();
+      //_checkJsToC();
+     // _checkCToJs();
+     // _checkSound();
     }
   }
 
   this.testqueue = function() {
-    _event.add(_win, 'load', function() { console.log("testqueu");} );
+    _event.add(_win, 'load', function() { console.log('testqueu');});
   }
   //flash
   //echo
@@ -111,21 +112,21 @@ function JsFlashC(id) {
  /****** Testing **********/
 
  //synchronization to overcame race condition when loading dynamically object
- // and calling flash function 
+ // and calling flash function
  _checkIfSwfLoaded = function(cbFunc) {
    var result = false;
    if (_js.swfLoaded) {
      result = true;
    } else {
-    _event.add(_win, 'load', function() { cbFunc();} );
+    _event.add(_win, 'load', function() { cbFunc();});
     return false;
    }
-   
+
    if (result && _js.swfReady) {
      result = true;
    } else {
      //busy waiting ...
-     var busyWait  = function() { 
+     var busyWait = function() {
       if (_js.swfReady) {
         return;
       } else {
@@ -133,7 +134,7 @@ function JsFlashC(id) {
         return;
       }
      }
-     setTimeout( busyWait, 100)
+     setTimeout(busyWait, 100);
      return false;
    }
    return result;
@@ -161,7 +162,8 @@ function JsFlashC(id) {
     // Credit to SoundManager2 for this:
     var s = _flashWrapper.style;
     s['position'] = 'fixed';
-    s['width'] = s['height'] = '8px'; // must be at least 6px for flash to run fast
+    // must be at least 6px for flash to run fast
+    s['width'] = s['height'] = '8px';
     s['bottom'] = s['left'] = '0px';
     s['overflow'] = 'hidden';
     _flashElement = _doc.createElement('div');
@@ -176,32 +178,35 @@ function JsFlashC(id) {
       '8',
       '8',
       '10.0.0',
-      "expressInstall.swf",
+      'expressInstall.swf',
       { 'debugMode': _js.debugMode }, //flashvars
-      {'allowScriptAccess': 'always', 'menu': 'false', 'quality': 'high', 
+      {'allowScriptAccess': 'always', 'menu': 'false', 'quality': 'high',
       'wmode' : 'transparent',
-      'hasPriority': 'true' }, // http://help.adobe.com/en_US/as3/mobile/WS4bebcd66a74275c36cfb8137124318eebc6-7ffd.html
+      'hasPriority': 'true' },
+      // http://help.adobe.com/en_US/as3/mobile/
+      //            WS4bebcd66a74275c36cfb8137124318eebc6-7ffd.html
       null,
       function(e) {
         //_js._flashElement = e.ref;
-        if(e.success)
-          console.log("swf loaded: success");
+        if (e.success)
+          console.log('swf loaded: success');
         else {
           //console.error("swf loaded: error " + e );
           _js._wD('[ERROR] SWF Object: not created.');
         }
-        if (_isWebkit) {
-          _flashElement.style.zIndex = 10000; // soundcloud-reported render/crash fix, safari 5
+        if (_isWebkit) { // soundcloud-reported render/crash fix, safari 5
+          _flashElement.style.zIndex = 10000;
         }
       }
     );
     //callback is not relaible to count on it while using flag semaphore
     // bind an event on window object when all thing ended loading
-    _event.add(_win, 'load', function() { 
-        _js._flashElement = swfobject.getObjectById('JsFlashC-object-' + _js.id);
+    _event.add(_win, 'load', function() {
+        _js._flashElement = swfobject.getObjectById('JsFlashC-object-' +
+                                                    _js.id);
         _js.swfLoaded = true;
         _js._wD('SWF Object: created.');
-    } );
+    });
 
 
     } else {
@@ -222,7 +227,7 @@ function JsFlashC(id) {
     if (!_flashElement) {
       _js._wD('JS->Flash: swf object reference is null', 3);
     }
-    str = _flashElement["version"]();
+    str = _flashElement['version']();
     if (str === '') {
       _js._wD('JS->Flash: not connected', 3);
       return false;
@@ -262,20 +267,55 @@ function JsFlashC(id) {
     return false;
   };
 
-// ----- ExternalInteraface for Flash  ------ 
+// ----- ExternalInteraface for Flash  ------
 
  _onFlashReady = function() {
-   _js.swfReady;
+   _js.swfReady = true;
  };
 
-// ----- Event Handling  ------ 
+ _isJsReady = function() {
+   return _js.swfLoaded ;
+ }
+ 
+ this.ping = function() {
+   return _js._flashElement.ping();
+ }
+
+ this._externalInterfaceOK = function(flashDate) {
+     // flash callback confirming flash loaded, EI working etc.
+     // flashDate = approx. timing/delay info for JS/flash bridge
+     if (_s.swfReady) {
+       return false;
+     }
+     var eiTime = new Date().getTime();
+     _js._wD(_smc + 'externalInterfaceOK()' +
+            (flashDate ? ' (~' + (eiTime - flashDate) + ' ms)' : ''));
+     //_debugTS('swf', true);
+     //_debugTS('flashtojs', true);
+     _js.swfReady = true;
+     /*
+     _tryInitOnFocus = false;
+     if (_isBadSafari) {
+       _badSafariFix();
+     }
+     if (_isIE) {
+       // IE needs a timeout OR delay until window.onload
+       //- may need TODO: investigating
+       setTimeout(_init, 100);
+     } else {
+       _init();
+     }
+     */
+   };
+
+// ----- Event Handling  ------
  //with a little help from SoundManager2
 _event = (function() {
 
     var old = (_win.attachEvent),
     evt = {
-      add: (old?'attachEvent':'addEventListener'),
-      remove: (old?'detachEvent':'removeEventListener')
+      add: (old ? 'attachEvent' : 'addEventListener'),
+      remove: (old ? 'detachEvent' : 'removeEventListener')
     };
 
     function getArgs(oArgs) {

@@ -13,16 +13,33 @@
 
 package
 {
-	import flash.display.Sprite;
-	import flash.external.ExternalInterface; // woo
-	import flash.utils.ByteArray;
-	
-	import flash.system.System;
-	
-    import cmodule.JsFlashC.CLibInit;
+  //Global
+  import flash.system.System; 
+  import flash.system.Security;
+  import flash.events.Event;
+  import flash.events.SecurityErrorEvent;
+  import flash.events.AsyncErrorEvent;
+  import flash.events.TimerEvent;
+  import flash.utils.Timer;
+  
+  import flash.display.Sprite;
+  
+  //Debug UI
+  import flash.text.TextField;
+  import flash.text.TextFormat;
+  import flash.text.TextFieldAutoSize;
+
+  //  Interface
+  import flash.external.ExternalInterface; // woo
+  
+  //Alchemy
+  import cmodule.JsFlashC.CLibInit;
+  import flash.utils.ByteArray;
   	
-  	
-  	
+  
+  /**
+   *  Flash wrapper (interface) for "Alchemy-all" C code which do the real job
+   */
     public class JsFlashC extends Sprite 
     {
     
@@ -50,9 +67,10 @@ package
     	public var flashDebugEnabled: Boolean = false; // Flash internal debug output (write to visible SWF in browser)
       public var caughtFatal: Boolean = false;
     
-    	public var messages:Array = [];
-     //   public var textField: TextField = null;
-	   // public var textStyle: TextFormat = new TextFormat();
+      public var paramList:Object = null;
+      public var messages:Array = [];
+      public var textField: TextField = null;
+	    public var textStyle: TextFormat = new TextFormat();
     
     	/** For Sharing */
     	public const Memory: ByteArray = new ByteArray();
@@ -62,55 +80,127 @@ package
 			
       public function JsFlashC()
 			{
-	    	var loader:CLibInit = new CLibInit;
-	    	_lib = loader.init();
-	    	
-	    	 if (ExternalInterface.available) {
-        		flashDebug('ExternalInterface available');
-        		try {
-        	  		flashDebug('Adding ExternalInterface callbacks...');
-        			ExternalInterface.addCallback('echo', _echo);
-         			ExternalInterface.addCallback('inc', _inc);
-         			ExternalInterface.addCallback('version', _version);
-       			 } catch(e: Error) {
-          			flashDebug('Fatal: ExternalInterface error: ' + e.toString());
-       			 }
-      		} else {
-        		flashDebug('Fatal: ExternalInterface (Flash &lt;-&gt; JS) not available');
-     		 };
-     		 
-     	/*	 // call after delay, to be safe (ensure callbacks are registered by the time JS is called below)
-      		var timer: Timer = new Timer(20, 0);
-     		 timer.addEventListener(TimerEvent.TIMER, function() : void {
-       			 timer.reset();
-        		_externalInterfaceTest(true);
-        		// timer.reset();
-        		// flashDebug('Init OK');
-      			});
-      		timer.start();
-      		// delayed, see above
-      		// _externalInterfaceTest(true);
-					*/
-		}
-		
-		
-		    
+			  
+			  // security settings 
+        if (allow_xdomain_scripting && xdomain) {
+          Security.allowDomain(xdomain);
+          version_as += ' - cross-domain enabled';
+        }
+        
+        //load flashVars from js
+        this.paramList = this.root.loaderInfo.parameters;
+        // <d>
+        if (this.paramList['debugMode'] == 1) {
+          this.flashDebugEnabled = true;
+        }
+        if (this.flashDebugEnabled) {
+          var canvas: Sprite = new Sprite();
+          canvas.graphics.drawRect(0, 0, stage.stageWidth, stage.stageHeight);
+          addChild(canvas);
+        }
+        // </d>
+        flashDebug('JsFlashC SWF ' + version + ' ' + version_as);
+
+
+        ///setting Interface for flash
+        if (ExternalInterface.available) {
+          flashDebug('ExternalInterface available');
+          _bindExternalInterface();
+        } else {
+            flashDebug('Fatal: ExternalInterface (Flash &lt;-&gt; JS) not available');
+        };
+        
+        /// initialization of Alchemy;
+        var loader:CLibInit = new CLibInit;
+        _lib = loader.init();
+ 
+        // call after delay, to be safe (ensure callbacks are registered by the time JS is called below)
+     /*   var timer: Timer = new Timer(20, 0);
+        timer.addEventListener(TimerEvent.TIMER, function() : void {
+          timer.reset();
+          _externalInterfaceTest(true);
+          // timer.reset();
+          // flashDebug('Init OK');
+        });
+        timer.start();
+       */
+        // delayed, see above
+      // _externalInterfaceTest(true);
+
+    } //end of constructor
+        
     // interface (for JS)
     // -----------------------------------
+
+    private function _checkJavaScriptReady() :Boolean{
+      var isReady:Boolean = ExternalInterface.call("_isJsReady");
+      return isReady;
+    }
+    
+    // @see http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/
+    //      3/flash/external/ExternalInterface.html#includeExamplesSummary
+    private function _bindExternalInterface() :void {
+      try {
+        trace("bindEnternalInterface");
+        flashDebug('Adding ExternalInterface callbacks...');
+        
+        //for external interface testing
+        ExternalInterface.addCallback('ping', _ping); 
+        ExternalInterface.addCallback('version', _version);     
+        ExternalInterface.addCallback('echo', _echo);
+        ExternalInterface.addCallback('_externalInterfaceTest', _externalInterfaceTest);        
+ 
+        // core state information
+        ExternalInterface.addCallback('_getMemoryUse', _getMemoryUse);
+        ExternalInterface.addCallback('_disableDebug', _disableDebug);
+        
+        // API to work on
+        ExternalInterface.addCallback('inc', _inc);
+        
+        
+        if (_checkJavaScriptReady()) {
+          flashDebug("JavaScript is ready.\n");
+        } else {
+          flashDebug("JavaScript is not ready, creating timer.\n");
+          var readyTimer:Timer = new Timer(20, 0);
+          readyTimer.addEventListener(TimerEvent.TIMER, 
+            function(event:TimerEvent) : void {
+              var isReady:Boolean = _checkJavaScriptReady();
+              if (isReady) {
+                 Timer(event.target).reset();
+                //_externalInterfaceTest(true);
+                // timer.reset();
+                ExternalInterface.call('jsFlashC._onFlashReady');
+                flashDebug('Init OK');
+              }
+          });
+          readyTimer.start();
+        }
+
+
+      } catch (error:SecurityError) {
+        flashDebug("Fatal: a SecurityError occurred: " + error.message + "\n");
+      } catch(e: Error) {
+        flashDebug('Fatal: ExternalInterface error: ' + e.toString());
+      }
+    }
     
     private function _version() :String {
       return version;
     }
     
+    private function _ping() :String {
+      var s:String = "pong";
+      flashDebug(s);
+      return s;
+    }
 		private function _echo(str:String) :String {
 			var s:String = _lib.echo(str);
-			trace(s);
 			return s;
 		}
 		
 		private function _inc(value:int)	:int {
 			_lib.inc(value);
-			trace(value);
 			return value;
 		}
 		
@@ -124,12 +214,12 @@ package
 	    
     // methods
     // -----------------------------------
-		
-		
-	public function flashDebug (txt:String) : void {
+
+    // taken from SoundManager2 as it is mature project
+    public function flashDebug (txt:String) : void {
       // <d>
       messages.push(txt);
-    /*  if (this.flashDebugEnabled) {
+      if (this.flashDebugEnabled) {
         var didCreate: Boolean = false;
         textStyle.font = 'Arial';
         textStyle.size = 12;
@@ -154,7 +244,6 @@ package
           this.addChild(textField);
         }
       }
-      */
 			// </d>
     } //end of flashDebug
     
@@ -192,6 +281,8 @@ package
           ExternalInterface.call(baseJSController + "._setSandboxType", sandboxType);
           writeDebug('JS to/from Flash OK');
         }
+      } catch (error:SecurityError) {
+            flashDebug("Fatal: a SecurityError occurred: " + error.message + "\n"); 
       } catch(e: Error) {
         flashDebug('Fatal: Flash &lt;-&gt; JS error: ' + e.toString());
         writeDebug('_externalInterfaceTest: Error: ' + e.toString());
